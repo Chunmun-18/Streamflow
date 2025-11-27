@@ -2,7 +2,9 @@ const express= require('express');
 const app =express();
 const mongoose=require('mongoose')
 require('dotenv').config()
-
+const userRoute = require('../api/routes/user')
+const bodyParser = require('body-parser') //First import body parser always
+const fileUpload = require('express-fileupload')
 const connectwithDB = async() =>{
     try{
         const res= await mongoose.connect(process.env.MONGODB_URI)
@@ -14,4 +16,11 @@ const connectwithDB = async() =>{
 }
 
 connectwithDB()
+app.use(bodyParser.json())
+//file uploaded on cloudinary because file cannot be uploaded in database, from that we can get url and image id and then it can be put in database (with password being in hash code)
+app.use(fileUpload({       
+    useTempFiles:true,
+    tempFileDir:'/tmp/'
+}))
+app.use('/user',userRoute)
 module.exports=app;
