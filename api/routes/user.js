@@ -5,6 +5,7 @@ const { default: mongoose } = require('mongoose');
 const cloudinary = require('cloudinary').v2; //library to connect app with cloudinary
 require('dotenv').config();
 const User = require('../models/user')
+const jwt= require('jsonwebtoken')  //to que token using id, password to track usercreate a uni
 
 
 cloudinary.config({ 
@@ -43,6 +44,58 @@ Router.post('/signup',async (req,res)=>{
         console.log(err)
         res.status(500).json({
             error:err
+        })
+    }
+})
+
+Router.post('/login',async (req,res)=>{
+    try{
+        const users= await User.find({email:req.body.email})
+        if(users.length==0){
+            return res.status(500).json({
+                error:"User does not exist"
+            })
+        }
+        else{
+            //bcrypt compare function is used to compare the hash code password with normal password
+            //sequence important for compare function hashed password comes at second place
+            const isValid= await bcrypt.compare( req.body.password,users[0].password) //uses[0] used because only 1 account can be created with 1 email
+            if(isValid){
+                const token = jwt.sign({
+                    _id:users[0]._id,
+                    channelName:users[0].channelName,
+                    email:users[0].email,
+                    phone:users[0].phone,
+                    logoId:users[0].loginId,
+
+                },
+            process.env.JWT_SECRET, //secret key which is necessary to verify if the token is made by us 
+            {
+                expiresIn:'365d'
+            }
+        ) 
+        res.status(200).json({
+            _id:users[0]._id,
+            channelName:users[0].channelName,
+            email:users[0].email,
+            phone:users[0].phone,
+            logoId:users[0].loginId,
+            logoUrl:users[0].logoUrl,
+            token:token,
+            subscribers:users[0].subscribers        })
+                
+            }
+            else{
+                return res.status(500).json({
+                    error:"Invalid password"
+                })
+            }
+        }
+    }
+    catch(err){
+        console.log(err)
+        res.status(500).json({
+            error:'Some issue'
         })
     }
 })
