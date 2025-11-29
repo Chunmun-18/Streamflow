@@ -69,7 +69,7 @@ Router.post('/login',async (req,res)=>{
                     logoId:users[0].loginId,
 
                 },
-            process.env.JWT_SECRET, //secret key which is necessary to verify if the token is made by us 
+               'abc123', //secret key which is necessary to verify if the token is made by us 
             {
                 expiresIn:'365d'
             }
@@ -82,9 +82,10 @@ Router.post('/login',async (req,res)=>{
             logoId:users[0].loginId,
             logoUrl:users[0].logoUrl,
             token:token,
-            subscribers:users[0].subscribers        })
+            subscribers:users[0].subscribers        
+        })
                 
-            }
+    }
             else{
                 return res.status(500).json({
                     error:"Invalid password"
@@ -99,5 +100,6 @@ Router.post('/login',async (req,res)=>{
         })
     }
 })
+
 
 module.exports = Router
