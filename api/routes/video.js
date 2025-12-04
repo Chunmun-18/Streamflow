@@ -19,10 +19,10 @@ Router.post('/upload',checkAuth, async (req,res)=>{  //First checkAuth will run 
     try {
         const token= req.headers.authorization.split(" ")[1];
         const user= await jwt.verify(token,process.env.JWT_SECRET); //in user we will get all the info using which token is made
-        console.log(user)
-        console.log(req.body)
-        console.log(req.files.video)
-        console.log(req.files.thumbnail)
+        // console.log(user)
+        // console.log(req.body)
+        // console.log(req.files.video)
+        // console.log(req.files.thumbnail)
 
         const uploadedVideo = await cloudinary.uploader.upload(req.files.video.tempFilePath,{
             resource_type:'video'
@@ -49,6 +49,59 @@ Router.post('/upload',checkAuth, async (req,res)=>{  //First checkAuth will run 
         console.log(err);
         res.status(500).json({
             error:err
+        })
+    }
+})
+
+//update video detail
+
+Router.put("/:videoId",checkAuth,async (req,res)=>{
+    try {
+        const verifiedUser= await jwt.verify(req.headers.authorization.split(" ")[1],process.env.JWT_SECRET);
+        // console.log(verifiedUser)
+        const video= await Video.findById(req.params.videoId)
+        // console.log(video)
+        if(video.user_id== verifiedUser._id){ //to check if the person who has uploaded the video is updating it
+            if(req.files){
+                //update thumbnail and text
+                await cloudinary.uploader.destroy(video.thumbnailId)
+                const updatedThumbnail= await cloudinary.uploader.upload(req.files.thumbnail.tempFilePath);
+                const updatedData= {
+                    title:req.body.title,
+                    description:req.body.description,
+                    category:req.body.category,
+                    tags:req.body.tags.split(','),
+                    thumbnailUrl:updatedThumbnail.secure_url,
+                    thumbnailId:updatedThumbnail.public_id
+                }
+                const updatedVideoDetail = await Video.findByIdAndUpdate(req.params.videoId,updatedData,{new:true});
+                res.status(200).json({
+                    updatedVideo : updatedVideoDetail
+                })
+            }else{
+                const updatedData= {
+                    title:req.body.title,
+                    description:req.body.description,
+                    category:req.body.category,
+                    tags:req.body.tags.split(',')
+                }
+                const updatedVideoDetail = await Video.findByIdAndUpdate(req.params.videoId,updatedData,{new:true});
+                res.status(200).json({
+                    updatedVideo : updatedVideoDetail
+                })
+
+        } 
+    }
+        else{
+            return res.status(500).json({
+                msg:"Permission Denied"
+            })
+        }
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error:error
         })
     }
 })
