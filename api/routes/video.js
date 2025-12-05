@@ -105,7 +105,7 @@ Router.put("/:videoId",checkAuth,async (req,res)=>{
         })
     }
 })
-
+//Delete video
 Router.delete("/:videoId",checkAuth,async (req,res)=>{
     try {
         const verifiedUser= await jwt.verify(req.headers.authorization.split(" ")[1],process.env.JWT_SECRET);
@@ -134,5 +134,44 @@ Router.delete("/:videoId",checkAuth,async (req,res)=>{
         })
     }
 })
+
+///like api
+Router.put('/like/:videoId',checkAuth,async(req,res)=>{
+    try {
+        const verifiedUser= await jwt.verify(req.headers.authorization.split(" ")[1],process.env.JWT_SECRET); //Helps to extract user id
+        const video= await Video.findById(req.params.videoId);
+        if(video.likedby.includes(verifiedUser._id)){
+            return res.status(500).json({
+                error:"already liked"
+            })
+        } else{
+            if(video.dislikedby.includes(verifiedUser._id)){
+                video.likes+=1;
+                video.dislike-=1;
+                video.dislikedby.pop(verifiedUser._id)
+                video.likedby.push(verifiedUser._id)
+                await video.save()
+                res.status(200).json({
+                    msg:"video liked"
+                })
+            }
+            else{
+                video.likes+=1;
+                video.likedby.push(verifiedUser._id)
+                await video.save()
+                res.status(200).json({
+                    msg:"video liked"
+                })
+            }
+        }
+    } 
+    catch(err) {
+        console.log(err);
+        res.status(500).json({
+            Error:err
+        })
+    }
+})
+
 
 module.exports = Router
