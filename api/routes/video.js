@@ -173,5 +173,41 @@ Router.put('/like/:videoId',checkAuth,async(req,res)=>{
     }
 })
 
+Router.put('/dislike/:videoId',checkAuth,async(req,res)=>{
+    try {
+        const verifiedUser= await jwt.verify(req.headers.authorization.split(" ")[1],process.env.JWT_SECRET); //Helps to extract user id
+        const video= await Video.findById(req.params.videoId);
+        if(video.dislikedby.includes(verifiedUser._id)){
+            return res.status(500).json({
+                error:"already disliked"
+            })
+        } else{
+            if(video.likedby.includes(verifiedUser._id)){
+                video.dislike+=1;
+                video.likes-=1;
+                video.dislikedby.push(verifiedUser._id);
+                video.likedby.pop(verifiedUser._id)
+                await video.save()
+                res.status(200).json({
+                    msg:"video disliked"
+                })
+            }
+            else{
+                video.dislike+=1;
+                video.dislikedby.push(verifiedUser._id);
+                await video.save()
+                res.status(200).json({
+                    msg:"video disliked"
+                })
+            }
+        }
+    } 
+    catch(err) {
+        console.log(err);
+        res.status(500).json({
+            Error:err
+        })
+    }
+})
 
 module.exports = Router
