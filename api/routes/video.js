@@ -106,4 +106,33 @@ Router.put("/:videoId",checkAuth,async (req,res)=>{
     }
 })
 
+Router.delete("/:videoId",checkAuth,async (req,res)=>{
+    try {
+        const verifiedUser= await jwt.verify(req.headers.authorization.split(" ")[1],process.env.JWT_SECRET);
+        // console.log(verifiedUser)
+        const video = await Video.findById(req.params.videoId)
+        if (video.user_id == verifiedUser._id){
+            //delete video,data,thumbnail
+            await cloudinary.uploader.destroy(video.videoId,{resource_type:'video'})
+            await cloudinary.uploader.destroy(video.thumbnailId);
+            const deletedResponse=await Video.findByIdAndDelete(req.params.videoId)
+            res.status(200).json({
+                msg:"Video deleted successfully",
+                deletedResponse : deletedResponse
+            })
+        }
+        else{
+            return res.status(500).json({
+                Error:"Permission Denied"
+            })
+        }        
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            error:error
+        })
+    }
+})
+
 module.exports = Router
