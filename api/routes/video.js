@@ -210,4 +210,24 @@ Router.put('/dislike/:videoId',checkAuth,async(req,res)=>{
     }
 })
 
+//view API
+Router.put('/views/:videoId',async (req,res)=>{
+    try{
+        const video= await Video.findById(req.params.videoId);
+        // console.log(video);
+        video.views+=1;
+        await video.save();
+        res.status(200).json({
+            msg:"Ok"
+        })
+    }
+    catch(err) {
+        console.log(err);
+        res.status(500).json({
+            Error:err
+        })
+    }
+    
+})
+
 module.exports = Router
