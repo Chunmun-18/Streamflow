@@ -9,6 +9,7 @@ const userSchema= new mongoose.Schema({
     logoUrl:{type:String, required:true},
     logoId:{type:String, required:true},  //Helps in updating 
     subscribers:{type:Number, default:0},
+    subscribedBy:[{type:mongoose.Schema.Types.ObjectId, ref:'User'}],
     subscribedChannels:[{type:mongoose.Schema.Types.ObjectId, ref:'User'}]
 },{timestamps:true}) //writing timestamps:true so that mongoose can itself manage the time at which it was created and last modified
 
