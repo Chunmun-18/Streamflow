@@ -5,7 +5,8 @@ const { default: mongoose } = require('mongoose');
 const cloudinary = require('cloudinary').v2; //library to connect app with cloudinary
 require('dotenv').config();
 const User = require('../models/user')
-const jwt= require('jsonwebtoken')  //to que token using id, password to track usercreate a uni
+const jwt= require('jsonwebtoken');  //to que token using id, password to track usercreate a uni
+const checkAuth = require('../middleware/checkAuth');
 
 
 cloudinary.config({ 
@@ -97,6 +98,35 @@ Router.post('/login',async (req,res)=>{
         console.log(err)
         res.status(500).json({
             error:'Some issue'
+        })
+    }
+})
+//subscribe api , user A- subscriber user B- channel
+Router.put('/subscribe/:userBId',checkAuth, async (req,res)=>{
+    try{
+        const userA= await jwt.verify(req.headers.authorization.split(" ")[1],process.env.JWT_SECRET);
+        const userB = await User.findById(req.params.userBId);
+        if(userB.subscribedBy.includes(userA._id)){
+            return res.status(500).json({
+                Error:"Already subscribed"
+            })
+        }
+        else{
+            userB.subscribers+=1
+            userB.subscribedBy.push(userA._id)
+            await userB.save();
+            const userAFullInfo = await User.findById(userA._id)
+            userAFullInfo.subscribedChannels.push(userB._id);
+            await userAFullInfo.save();
+            res.status(200).json({
+                msg:"Channel subscribed"
+            })
+        }
+    }
+    catch(err) {
+        console.log(err);
+        res.status(500).json({
+            Error:err
         })
     }
 })
