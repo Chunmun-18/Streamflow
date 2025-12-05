@@ -130,6 +130,33 @@ Router.put('/subscribe/:userBId',checkAuth, async (req,res)=>{
         })
     }
 })
-
+Router.put('/unsubscribe/:userBId',checkAuth,async (req,res)=>{
+    try {
+        const userA= await jwt.verify(req.headers.authorization.split(" ")[1],process.env.JWT_SECRET);
+        const userB = await User.findById(req.params.userBId);
+        const userAFullInfo = await User.findById(userA._id)
+        if(userB.subscribedBy.includes(userA._id)){
+            userB.subscribedBy.pop(userA._id);
+            userB.subscribers-=1;
+            userAFullInfo.subscribedChannels.pop(userB._id);
+            await userAFullInfo.save();
+            await userB.save();
+            res.status(200).json({
+                msg:"Unsubscribed"
+            })
+        }
+        else{
+            return res.status(500).json({
+                msg:"Channel not subscribed"
+            })
+        }
+    } 
+    catch(err) {
+        console.log(err);
+        res.status(500).json({
+            Error:err
+        })
+    }
+})
 
 module.exports = Router
