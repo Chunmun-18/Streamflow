@@ -15,7 +15,6 @@ const videoSchema= new mongoose.Schema({
     dislike:{type:Number, default:0},
     likedby:[{type:mongoose.Schema.Types.ObjectId, ref:'User'}],
     dislikedby:[{type:mongoose.Schema.Types.ObjectId, ref:'User'}],
-    viewedby:[{type:mongoose.Schema.Types.ObjectId, ref:'User'}]
 },{timestamps:true}) //writing timestamps:true so that mongoose can itself manage the time at which it was created and last modified
 
 module.exports= mongoose.model("Video",videoSchema)
