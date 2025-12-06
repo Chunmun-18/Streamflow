@@ -72,4 +72,30 @@ Router.put('/:commentId',checkAuth,async (req,res)=>{
     }
 })
 
+//Deleted comment
+Router.delete('/:commentId',checkAuth,async (req,res)=>{
+    try {
+        const verifiedUser= await jwt.verify(req.headers.authorization.split(" ")[1],process.env.JWT_SECRET); //Helps to extract user id
+        const comment= await Comment.findById(req.params.commentId);
+        if(comment.userId!=verifiedUser._id){
+            return res.status(500).json({
+                error:"invalid user"
+            })
+        }
+        else{
+            await Comment.findByIdAndDelete(req.params.commentId)
+            res.status(200).json({
+                deleteddata:'success'
+            })
+        }
+    } 
+    catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error:error
+        })
+    }
+})
+
+
 module.exports = Router;
