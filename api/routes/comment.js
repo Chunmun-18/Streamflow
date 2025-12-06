@@ -10,7 +10,17 @@ const mongoose= require('mongoose')
 
 Router.post('/new-comment/:videoId',checkAuth,async (req,res)=>{
     try{
-        //
+        const verifiedUser= await jwt.verify(req.headers.authorization.split(" ")[1],process.env.JWT_SECRET);
+        const newComment = new Comment({
+            _id:new mongoose.Types.ObjectId(),
+            userId: verifiedUser._id,
+            videoId:req.params.videoId,
+            commentText:req.body.commentText
+        })
+        const comment= await newComment.save()
+        res.status(200).json({
+            newComment:comment
+        })
     }
     catch(err){
         console.log(err);
