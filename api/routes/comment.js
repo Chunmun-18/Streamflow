@@ -30,4 +30,20 @@ Router.post('/new-comment/:videoId',checkAuth,async (req,res)=>{
     }
 })
 
+//get all comment API
+Router.get('/:videoId',async(req,res)=>{
+    try {
+        const comments= await Comment.find({videoId:req.params.videoId}).populate('userId','channelName logoUrl')
+        res.status(200).json({
+            commentList:comments
+        })
+    } 
+    catch (err) {
+        console.log(err);
+        res.status(500).json({
+            error:err
+        })
+    }
+})
+
 module.exports = Router;
