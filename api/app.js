@@ -5,6 +5,7 @@ require('dotenv').config()
 const userRoute = require('../api/routes/user')
 const videoRoute= require('../api/routes/video')
 const commentRoute= require("../api/routes/comment")
+const cors = require('cors')
 const bodyParser = require('body-parser') //First import body parser always
 const fileUpload = require('express-fileupload')
 const connectwithDB = async() =>{
@@ -18,6 +19,7 @@ const connectwithDB = async() =>{
 }
 
 connectwithDB()
+app.use(cors())
 app.use(bodyParser.json())
 //file uploaded on cloudinary because file cannot be uploaded in database, from that we can get url and image id and then it can be put in database (with password being in hash code)
 app.use(fileUpload({       
