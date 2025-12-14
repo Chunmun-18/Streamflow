@@ -15,6 +15,25 @@ cloudinary.config({
     api_secret: process.env.API_SECRET
   });
 
+//get own video
+
+Router.get('/own-video',checkAuth,async (req,res)=>{
+    try {
+        const token= req.headers.authorization.split(" ")[1];
+        const user= await jwt.verify(token,process.env.JWT_SECRET); 
+        const videos= await Video.find({user_id:user._id})
+        res.status(200).json({
+            videos:videos
+        })
+    } 
+    catch (error) {
+        console.log(error)
+        res.status(500).json({
+            error:error
+        })
+    }
+})
+
 Router.post('/upload',checkAuth, async (req,res)=>{  //First checkAuth will run then after next the code here will run
     try {
         const token= req.headers.authorization.split(" ")[1];
