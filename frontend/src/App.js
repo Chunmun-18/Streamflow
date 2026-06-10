@@ -2,7 +2,6 @@ import { createBrowserRouter } from 'react-router-dom';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import './App.css';
-import { Component } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';

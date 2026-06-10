@@ -68,7 +68,7 @@ const Upload = () => {
 
         <label>Thumbnail</label>
         <input onChange={thumbnailHandler} type='file' />
-        {imageUrl&& <img className='thumbnail' src={imageUrl}/>}
+        {imageUrl&& <img className='thumbnail' src={imageUrl} alt="uploaded thumbnail"/>}
         <input type='submit' value={loading ? 'Uploading...' : 'Submit'} disabled={loading}/>
       </form>
     </div>
